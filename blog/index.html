@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Notes from Avinash Negi on Python, projects, and learning in public.">
+  <meta property="og:title" content="Notes — Avinash Negi">
+  <meta property="og:description" content="Python, projects, mistakes, and what I learned fixing them.">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <title>Notes — Avinash Negi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <nav class="nav" aria-label="Primary navigation">
+    <a class="brand" href="https://avinashnegi.com">Avinash Negi</a>
+    <div class="nav-links">
+      <a aria-current="page" href="./">Blog</a>
+      <a href="https://avinashnegi.com/#work">Work</a>
+      <a class="cta" href="mailto:avinashnegi1999work@gmail.com">Contact</a>
+    </div>
+  </nav>
+
+  <main id="main">
+    <header class="hero">
+      <div class="hero-inner">
+        <span class="badge">Notes from Kotdwara</span>
+        <h1>I write down what<br>I had to figure out.</h1>
+        <p class="intro">Python, projects, mistakes, and the useful parts of fixing them.</p>
+        <span class="sticker s1" aria-hidden="true"></span>
+        <span class="sticker s2" aria-hidden="true"></span>
+        <span class="sticker s3" aria-hidden="true"></span>
+        <span class="sticker s4" aria-hidden="true"></span>
+      </div>
+    </header>
+
+    <section class="index" aria-labelledby="latest-heading">
+      <div class="section-heading">
+        <h2 id="latest-heading">Latest notes</h2>
+        <button id="sort-toggle" class="sort-btn" aria-label="Sort articles">Newest first ↓</button>
+      </div>
+
+      <div class="articles">
+        <a class="article" href="https://medium.com/@avinashnegi1999/why-im-documenting-my-tech-journey-the-beginning-37b9c15df793" target="_blank" rel="noopener">
+          <img src="https://cdn-images-1.medium.com/max/1024/1*cXtDXVFdHobkRWUZeciqPg.png" alt="Why I'm Documenting My Tech Journey article cover" width="1024" height="576" loading="lazy">
+          <div class="article-copy">
+            <p>Medium</p>
+            <h3>Why I’m Documenting My Tech Journey (The Beginning)</h3>
+            <span>Read article</span>
+          </div>
+        </a>
+
+        <a class="article" href="https://100-days-of-code.hashnode.dev/" target="_blank" rel="noopener">
+          <img src="img/100days.jpg" alt="100 Days of Code cover" width="1024" height="576" loading="lazy">
+          <div class="article-copy">
+            <p>Hashnode</p>
+            <h3>100 Days of Code</h3>
+            <span>Open publication</span>
+          </div>
+        </a>
+
+        <a class="article" href="https://dsawithpython.hashnode.dev/" target="_blank" rel="noopener">
+          <img src="img/dsa.jpg" alt="DSA with Python cover" width="1024" height="576" loading="lazy">
+          <div class="article-copy">
+            <p>Hashnode</p>
+            <h3>DSA with Python</h3>
+            <span>Open publication</span>
+          </div>
+        </a>
+
+        <a class="article" href="https://roadtotokyo.hashnode.dev/" target="_blank" rel="noopener">
+          <img src="img/tokyo.jpg" alt="Road to Tokyo cover" width="1024" height="576" loading="lazy">
+          <div class="article-copy">
+            <p>Hashnode</p>
+            <h3>Road to Tokyo</h3>
+            <span>Open publication</span>
+          </div>
+        </a>
+
+        <a class="article" href="https://linuxforbeginners.hashnode.dev/" target="_blank" rel="noopener">
+          <img src="img/linux.jpg" alt="Linux for Beginners cover" width="1024" height="576" loading="lazy">
+          <div class="article-copy">
+            <p>Hashnode</p>
+            <h3>Linux for Beginners</h3>
+            <span>Open publication</span>
+          </div>
+        </a>
+
+        <a class="article" href="https://medium.com/@avinashnegi1999/i-built-a-keyboard-rgb-app-for-my-laptop-and-it-froze-the-whole-machine-twice-02db56038ecb" target="_blank" rel="noopener">
+          <img src="https://cdn-images-1.medium.com/max/1024/1*g3gshy_WaUxIOjeELEiiTw.png" alt="Keyboard RGB app article cover" width="1024" height="576" loading="lazy">
+          <div class="article-copy">
+            <p>Medium</p>
+            <h3>I built a keyboard RGB app for my laptop and it froze the whole machine. Twice.</h3>
+            <span>Read article</span>
+          </div>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Built and written by Avinash Negi.</p>
+    <div>
+      <a href="https://github.com/avinashnegi1999" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://www.linkedin.com/in/avinashnegi1999" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="mailto:avinashnegi1999work@gmail.com">Email</a>
+    </div>
+  </footer>
+
+  <script>
+    (() => {
+      const btn = document.getElementById('sort-toggle');
+      const container = document.querySelector('.articles');
+      const STORAGE_KEY = 'blog-sort-order';
+
+      // HTML is oldest-first; default display is newest-first unless user saved a preference
+      const saved = localStorage.getItem(STORAGE_KEY);
+      let isNewestFirst = saved ? saved === 'newest' : true;
+
+      function applySort() {
+        const articles = [...container.children];
+        // HTML source is oldest-first, so reverse for newest-first
+        if (isNewestFirst) {
+          articles.sort(() => -1);
+          articles.reverse();
+        }
+        articles.forEach(a => container.appendChild(a));
+        btn.textContent = isNewestFirst ? 'Newest first ↓' : 'Oldest first ↓';
+      }
+
+      // Apply sort on page load
+      applySort();
+
+      btn.addEventListener('click', () => {
+        // Reverse current order
+        const articles = [...container.children];
+        articles.reverse();
+        articles.forEach(a => container.appendChild(a));
+        isNewestFirst = !isNewestFirst;
+        btn.textContent = isNewestFirst ? 'Newest first ↓' : 'Oldest first ↓';
+        localStorage.setItem(STORAGE_KEY, isNewestFirst ? 'newest' : 'oldest');
+      });
+    })();
+  </script>
+</body>
+</html>
