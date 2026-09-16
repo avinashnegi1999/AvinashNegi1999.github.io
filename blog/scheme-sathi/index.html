@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Scheme Sathi — why I picked it, how I built it with AI, and the bugs that only a real phone found">
+  <meta property="og:title" content="I built a welfare bot that refuses to answer">
+  <meta property="og:description" content="Scheme Sathi — why I picked it, how I built it with AI, and the bugs that only a real phone found">
+  <meta property="og:type" content="article">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <title>I built a welfare bot that refuses to answer — Avinash Negi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@300;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="post-verge.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="topbar">
+    <a class="brand" href="https://avinashnegi.com">AVINASH<span>NEGI</span></a>
+    <nav class="topnav" aria-label="Primary navigation">
+      <a href="../">Blog</a>
+      <a href="https://avinashnegi.com/#work">Work</a>
+      <a href="mailto:avinashnegi1999work@gmail.com">Contact</a>
+      <a class="pill" href="https://t.me/YojanaSathiBot">Try the bot ↗</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <p class="whisper">Build log · Scheme Sathi · Sept 2026</p>
+      <h1 class="shout">I BUILT A WELFARE BOT THAT REFUSES TO ANSWER</h1>
+      <p class="deck">Scheme Sathi — why I picked it, how I built it with AI, and the bugs that only a real phone found</p>
+      <div class="hero-meta">
+        <span class="mono">BY AVINASH NEGI</span>
+        <span class="mono">16 SEPT 2026</span>
+        <span class="mono">11 MIN READ</span>
+      </div>
+      <div class="hazard" aria-hidden="true"></div>
+    </section>
+
+    <div class="layout">
+      <aside class="stream" aria-label="Contents">
+        <p class="mono stream-label">IN THIS STORY</p>
+        <ol>
+          <li><span class="stamp">01</span><a href="#the-number-that-decided-the-architecture">The number that decided the architecture</a></li>
+          <li><span class="stamp">02</span><a href="#how-i-got-here">How I got here</a></li>
+          <li><span class="stamp">03</span><a href="#four-rules-decided-before-any-code">Four rules, decided before any code</a></li>
+          <li><span class="stamp">04</span><a href="#the-ai-part-honestly">The AI part, honestly</a></li>
+          <li><span class="stamp">05</span><a href="#five-bugs-worth-telling">Five bugs worth telling</a></li>
+          <li><span class="stamp">06</span><a href="#where-it-honestly-stands">Where it honestly stands</a></li>
+          <li><span class="stamp">07</span><a href="#if-youre-starting-something-like-this">If you&#39;re starting something like this</a></li>
+        </ol>
+      </aside>
+      <article class="article">
+<h2 id="the-number-that-decided-the-architecture" class="tile tile-mint"><span class="kicker">01 <span aria-hidden="true">//</span> Section</span><span class="tile-title">The number that decided the architecture</span></h2>
+<p><strong>A casual labourer in India earns ₹455 a day if male, ₹315 if female.</strong> That is from the Periodic Labour Force Survey Annual Report 2025. I can point at the PDF.</p>
+<p>Now imagine someone tells that worker they qualify for a government scheme. To claim it they skip a day&#39;s work, pay bus fare both ways, stand in line at a Common Service Centre — and the operator says no, you don&#39;t qualify. They just paid ₹455 for a wrong answer, and most of them never come back for a second try.</p>
+<p>So a wrong <strong>yes</strong> costs a day&#39;s wages. A wrong <strong>no</strong> costs an entitlement they may have been owed for years and will never ask about again. Those two errors are not the same size and not in the same unit. Everything in this project follows from that.</p>
+<hr class="rule">
+<h2 id="how-i-got-here" class="tile tile-purple"><span class="kicker">02 <span aria-hidden="true">//</span> Section</span><span class="tile-title">How I got here</span></h2>
+<p>Scheme Sathi is my second entry for the Code for a Billion hackathon. The first was <strong>Saans</strong>, an air-exposure bot on Telegram — 3,500 lines, zero dependencies, a live bot, a public repo. Finished code. I parked it on 30 August.</p>
+<p>The reason I told myself was that the idea already existed in another app. That felt bad, so I stopped. But novelty isn&#39;t a judging criterion. The real reason was that Saans was <strong>never deployed and never used by a single person</strong>, and 25% of the score is deployment and impact. Losing on novelty was a feeling. Losing on &quot;you have zero users&quot; is a score. Being able to tell those two apart is the most useful thing Saans gave me.</p>
+<p>The problem I moved to: India has about <strong>44 crore unorganised workers</strong> — construction labour, domestic workers, drivers, vendors — and the welfare schemes for them already exist. <strong>31.48 crore</strong> are registered on e-Shram with 14 central schemes plugged into it. The gap isn&#39;t eligibility. It&#39;s that the rules are scattered, in English, in bureaucratic language, and a failed trip costs a day&#39;s wages.</p>
+<p><em>&quot;But myScheme.gov.in exists.&quot;</em> It does, and it&#39;s good. It&#39;s also an English web form that assumes literacy, a browser, and a user who knows what &quot;land holding in hectares&quot; means. Scheme Sathi is a conversation in Hindi on a ₹6,000 phone that ends in a checklist and an address to walk to. Last-mile delivery on top of the government site, not a replacement.</p>
+<hr class="rule">
+<h2 id="four-rules-decided-before-any-code" class="tile tile-yellow"><span class="kicker">03 <span aria-hidden="true">//</span> Section</span><span class="tile-title">Four rules, decided before any code</span></h2>
+<ol>
+<li><p><strong>The language model may not touch an eligibility decision.</strong> Eligibility is a pure function — no network, no clock, no randomness. A model may help map &quot;I lay bricks&quot; to a job category (always confirmed back to the worker) and rephrase Hindi a human wrote. It never sees a threshold or produces a verdict. A test asserts that importing the rules package pulls in no model and no HTTP client. Running with no API key is a tested configuration, not a degraded one.</p>
+</li>
+<li><p><strong>An unresearched value is the string <code>&quot;TODO&quot;</code>, never <code>0</code>.</strong> <code>annual_value_inr = &quot;TODO&quot;</code> — because a zero looks researched and no validator can tell the difference. Any file with a <code>&quot;TODO&quot;</code> still loads, gets flagged, and the engine returns UNKNOWN for it.</p>
+</li>
+<li><p><strong>Verdicts are three-valued: ELIGIBLE, INELIGIBLE, UNKNOWN.</strong> &quot;I couldn&#39;t check this — ask this exact question at the centre&quot; costs the worker neither a wasted day nor a lost entitlement. Most systems treat unknown as failure. Here it&#39;s a legitimate answer.</p>
+</li>
+<li><p><strong>The profile has no name, phone, or Aadhaar field.</strong> Not &quot;we don&#39;t store it&quot; — the fields don&#39;t exist, so they can&#39;t be filled by accident. Coarse income bands in the log, a random session id unrelated to the Telegram chat id, and any statistic under five people is suppressed.</p>
+</li>
+</ol>
+<p>The shape that came out of this: scheme rules live in TOML files, each value carrying a deep link to the sentence in the official document it came from and the date it was read. A rule engine evaluates a profile against them. A conversation layer asks the questions in Hindi or English with buttons. Telegram and WhatsApp adapters speak the same conversation from the same engine. Python standard library only, SQLite for the event log, systemd on a small AWS box.</p>
+<hr class="rule">
+<h2 id="the-ai-part-honestly" class="tile tile-pink"><span class="kicker">04 <span aria-hidden="true">//</span> Section</span><span class="tile-title">The AI part, honestly</span></h2>
+<p>Let me say the uncomfortable thing first. <strong>I did not type most of this code.</strong> Claude Code wrote it, I described what I wanted and read the diff. If you want to call that vibe coding, that&#39;s fair.</p>
+<p>What I did do, and can prove from the git log: I decided the four rules above. I read every government PDF the scheme values came from — not one threshold, rupee figure or age band in this project was authored by a model. I used the bot the way a worker would and found the bugs the tests missed. I set up the Telegram bot, the AWS account, the Meta app and the WhatsApp number by hand in three consoles. I debugged the things that broke on a real server at night.</p>
+<p><strong>What worked:</strong></p>
+<ul>
+<li><strong>Plan before edit.</strong> For anything touching more than one file, the assistant read the code and produced a plan, I approved or changed it, then it wrote. Letting a model start editing from a one-line prompt gives you a diff you have to review harder than writing it yourself.</li>
+<li><strong>Commit messages that name who gets hurt.</strong> <code>Read a tax &quot;Yes&quot; back before it costs someone a pension</code>. <code>Stop adding an accident cover to a pension</code>. When the message has to say the consequence to the worker, you notice the fixes where you can&#39;t.</li>
+<li><strong>Making it break its own fix.</strong> Every new test, I&#39;d have the fix reverted and check the test went red. If it stayed green, the test was decorative. Caught more bad tests than anything else. Costs ninety seconds.</li>
+<li><strong>Two models arguing beat one model agreeing with me.</strong> I made the repo public and ran it through ChatGPT three times, then had Codex and Claude Code review each other&#39;s fixes on the same checkout. Codex&#39;s design beat Claude&#39;s twice — on double-tap handling and on age parsing (<code>str.isdecimal()</code> before <code>int()</code>, which rejects <code>3_4</code> but still accepts Devanagari <code>३४</code>). Then Codex&#39;s own fix silently broke my exhaustive path test — every button tap was rejected, no session was ever created, and the test ran green against the opening screen. Claude measured that and repaired it. Next morning a second Codex pass found two bugs in Claude&#39;s fix from the night before. Neither model was reliably better. The value was that they disagreed, and every disagreement was something I had to actually understand to settle.</li>
+</ul>
+<p><strong>What did not work:</strong></p>
+<ul>
+<li><strong>Anything requiring a fact about the real world.</strong> A model is very good at &quot;restructure this state machine&quot; and structurally incapable of &quot;what does the PM-SYM page say the contribution is at age 32.&quot; Ask it and you get a plausible number, which is the exact thing this project exists to prevent.</li>
+<li><strong>Review findings that were my own comments read back to me.</strong> A meaningful fraction of the first ChatGPT round was known trade-offs from my <code># ?</code> comments, returned as discoveries. It also scored &quot;domain correctness 7.6&quot; without opening a single source PDF.</li>
+<li><strong>Advice that contradicted a constraint the reviewer had just praised.</strong> Two rounds told me to add location routing — &quot;the CSC 4 km away&quot; — in the same review that praised the privacy model. Location routing needs a pincode in the profile. The privacy model is that the field doesn&#39;t exist. I didn&#39;t do it, and I wrote down why. <em>&quot;I was told to do this and I didn&#39;t, here&#39;s the reasoning&quot;</em> is worth more than any claim about who typed which line.</li>
+</ul>
+<hr class="rule">
+<h2 id="five-bugs-worth-telling" class="tile tile-orange"><span class="kicker">05 <span aria-hidden="true">//</span> Section</span><span class="tile-title">Five bugs worth telling</span></h2>
+<h3 id="1-the-readme-said-dont-screen-a-real-worker-the-code-didnt-care">1. The README said &quot;don&#39;t screen a real worker.&quot; The code didn&#39;t care.</h3>
+<p>The worst one, found by outside review. I&#39;d written in bold in the README that the scheme data hadn&#39;t been checked by a second person. I&#39;d written it in a comment at the top of every scheme file. I&#39;d written a test asserting the warning was still there. Three places, all prose. Meanwhile <code>Scheme.is_verified</code> returned <code>not self.stubs</code> — &quot;no TODOs left&quot; was being treated as &quot;verified&quot; — so the app printed <code>PMSBY: verified</code> at startup and served real verdicts off data one person had transcribed from a PDF once.</p>
+<p>Now <em>researched</em> and <em>signed off by a named human</em> are separate states, and only a scheme that is both can produce a verdict. Enforcing it made the bot tell every worker &quot;I couldn&#39;t check this yet&quot; for every scheme until I sat down with the sources and signed each file. A worse demo and a better product. <strong>A warning in a README protects nobody. If a rule matters, the code path that would violate it has to be the thing that stops.</strong></p>
+<p>Enforcing it also quietly gutted the test suite — no servable scheme, no eligible result, no application pack. The exhaustive walk dropped to a fifth of its paths and built zero packs while passing every assertion it reached. It was caught only because that test counts its own coverage and asserts on the counters.</p>
+<h3 id="2-six-bugs-in-the-first-hour-of-real-use-none-in-the-engine">2. Six bugs in the first hour of real use — none in the engine</h3>
+<p>I put the bot live and used it like a worker. A <code>reply_markup: null</code> field made Telegram reject the message with a bare 400 and silently kill the session. A free-text occupation box looped back into the menu that led to it. No income band for a worker earning nothing. English screens whose <em>messages</em> were English while the <em>buttons</em> under them were Hindi. Every test that passed while those shipped was asserting on message text; the bugs were one layer out, in the keyboards. Same lesson as Saans, almost word for word: <strong>test what the user touches, not what is convenient to assert.</strong></p>
+<h3 id="3-a-double-tap-wrote-the-bank-answer-into-the-tax-field">3. A double tap wrote the bank answer into the tax field</h3>
+<p>On a cheap phone with weak signal, people tap twice. A stale button press from the previous question could answer the current one — a &quot;Yes, I have a bank account&quot; landing as &quot;Yes, I pay income tax,&quot; which disqualifies someone from a pension. The fix that shipped was Codex&#39;s, not Claude&#39;s: remember the <code>message_id</code> of the keyboard currently on screen, accept a callback only from it, retire it before processing. Verified by driving a real double tap and checking the tax field stayed <code>None</code>.</p>
+<h3 id="4-my-impact-number-was-six-times-too-big">4. My impact number was six times too big</h3>
+<p>Once real scheme values went in, the headline &quot;annual entitlement surfaced&quot; jumped — because I was summing PMSBY&#39;s ₹2,00,000 accident <em>cover</em> with PM-SYM&#39;s ₹36,000/year <em>pension</em>. A contingent insurance payout and a guaranteed annual pension are not the same kind of money. They&#39;re separate numbers everywhere now, and the label &quot;entitlement surfaced, not money delivered&quot; travels with the figure into the chat, the printed sheet and the dashboard.</p>
+<p>The same bug came back a week later, one layer up: a 65-year-old widow qualifies for both Uttarakhand pensions but the state pays one, and while the worker-facing result collapsed them correctly, the dashboard summed both. A crash is visible. An inflated impact number survives all the way to a judge.</p>
+<h3 id="5-the-things-no-assistant-could-do-for-me-and-what-i-broke-doing-them">5. The things no assistant could do for me, and what I broke doing them</h3>
+<p>Telegram was five minutes with BotFather. AWS: I created the IAM user and pasted the console password <em>and</em> the access key and secret straight into the chat, because the console showed all three on one screen and I didn&#39;t know which was the secret. Everything was treated as burned, a replacement key was written straight to <code>~/.aws/credentials</code> without being printed, and the console login was deleted rather than rotated. &quot;Vibe coder leaks cloud credentials&quot; is exactly the story people expect; the honest version is yes, the fix took thirty seconds, and now I know what an access key looks like.</p>
+<p>Meta was slower. App, WhatsApp product, test number, verifying my own phone as a recipient — all manual, all fine. Then WhatsApp went silent about a day after it first worked, while Telegram on the same box kept answering. Nothing in the logs said &quot;token.&quot; The temporary token Meta hands you expires after 24 hours; a permanent one needs a System User under the business with both the app and the WhatsApp account assigned as assets, four screens deep and mentioned nowhere near the screen that gives you the temporary one. That took an evening.</p>
+<p>And deployment itself sat parked for days behind Azure student verification and a Fly.io card preauth that Indian cards decline — until I asked &quot;can I just use AWS&quot; and found an account already carrying $120 of credit. The whole deploy took under an hour, most of it waiting for the instance to boot. The estimate that had kept it parked was wrong by an order of magnitude the entire time. <strong>Deploy before you polish.</strong> Only one of them is measured.</p>
+<hr class="rule">
+<h2 id="where-it-honestly-stands" class="tile tile-white"><span class="kicker">06 <span aria-hidden="true">//</span> Section</span><span class="tile-title">Where it honestly stands</span></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Live</td>
+<td><a href="https://t.me/YojanaSathiBot">@YojanaSathiBot</a> on Telegram, 24×7 on AWS EC2 (~$10.50/month)</td>
+</tr>
+<tr>
+<td>Schemes</td>
+<td><strong>10 signed and live</strong>, each value deep-linked to its source; 4 researched drafts that return UNKNOWN until I sign them; 1 that lost its signature when a Hindi source changed a rule</td>
+</tr>
+<tr>
+<td>WhatsApp</td>
+<td>built, verified end to end on Meta&#39;s test number, not on a public number — production needs Business Verification and a second SIM</td>
+</tr>
+<tr>
+<td>Tests</td>
+<td>zero dependencies, <code>python3 check.py</code>, exhaustive button walk in both languages plus an independent rule oracle across ~200,000 verdicts</td>
+</tr>
+<tr>
+<td>Real workers screened</td>
+<td><strong>zero</strong></td>
+</tr>
+</tbody></table>
+<p>That last row is the honest one. Everything that&#39;s missing is person-shaped: a native Hindi speaker to read the strings, a worker to press Start, a phone call to a CSC operator about one age cap, a verification queue at Meta. None of it is &quot;the code doesn&#39;t work.&quot;</p>
+<p>There&#39;s also a risk above all of it I can&#39;t control: the hackathon&#39;s submission form has a required checkbox saying the project was built in AgentFoundry, the official IDE. This was built locally. I&#39;ve asked whether importing a repo qualifies — publicly in a GitHub Discussion with zero replies, and by email to the address in the organiser&#39;s own footer, which hard-bounced. I&#39;m logging every attempt with a date rather than ticking the box. If the answer is no, the project loses a hackathon and keeps everything else.</p>
+<hr class="rule">
+<h2 id="if-youre-starting-something-like-this" class="tile tile-mint"><span class="kicker">07 <span aria-hidden="true">//</span> Section</span><span class="tile-title">If you&#39;re starting something like this</span></h2>
+<ul>
+<li><strong>Decide what you&#39;re not willing to be wrong about before you open the editor.</strong> The ₹455 figure became a type signature. Every good decision in this codebase traces back to it.</li>
+<li><strong>Let the AI type. Don&#39;t let it decide, and don&#39;t let it know facts.</strong> The moment a model supplies a real-world number, you&#39;ve built a very confident liar.</li>
+<li><strong>Use your own thing on a real phone before anyone else does.</strong> Every serious bug in this project was found that way, and none by the test suite that was green at the time.</li>
+<li><strong>Ship before you&#39;re ready.</strong> You&#39;ll learn more from the first stranger pressing a button than from the next week of refactoring.</li>
+</ul>
+<hr class="rule">
+<h2 id="links" class="tile tile-purple"><span class="kicker">08 <span aria-hidden="true">//</span> Where to go</span><span class="tile-title">Links</span></h2>
+<ul>
+<li><strong>Code:</strong> <a href="https://github.com/avinashnegi1999/yojana-sathi">github.com/avinashnegi1999/yojana-sathi</a> — Apache-2.0</li>
+<li><strong>Try it:</strong> <a href="https://t.me/YojanaSathiBot">@YojanaSathiBot</a></li>
+<li><strong>The site:</strong> <a href="https://avinashnegi.com/yojana-sathi/">avinashnegi.com/yojana-sathi</a> — video, screenshots, live counters</li>
+<li><strong>The long version:</strong> <code>docs/BUILD_LOG.md</code> in the repo — every bug and wrong turn, nothing tidied up</li>
+<li><strong>The handbook:</strong> <a href="https://github.com/avinashnegi1999/scheme-sathi-handbook">scheme-sathi-handbook</a> — 19 chapters on the same material</li>
+</ul>
+
+      </article>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <div class="foot-inner">
+      <span class="brand">AVINASH<span>NEGI</span></span>
+      <nav class="mono" aria-label="Footer">
+        <a href="../">ALL NOTES</a>
+        <a href="https://github.com/avinashnegi1999/yojana-sathi">SOURCE</a>
+        <a href="https://avinashnegi.com/yojana-sathi/">PROJECT SITE</a>
+      </nav>
+      <span class="mono fine">© 2026 · KOTDWARA</span>
+    </div>
+  </footer>
+</body>
+</html>
