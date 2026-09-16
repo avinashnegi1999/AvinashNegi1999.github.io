@@ -48,7 +48,12 @@ Motion is one idea, used sparingly: content fades up as it comes into view. Ever
 
 **Blog** — Notion's design language instead: warm `#f6f5f4` paper canvas, Inter, a single indigo
 hero band, one blue (`#0075de`) for links, hairline dividers. Posts are listed Medium-style — one
-row each, copy left, cover right. Tokens live in `blog/DESIGN.md`.
+row each, copy left, cover right.
+
+**Long-form posts** may use their own system — the Scheme Sathi build log uses The Verge's tokens on a
+white canvas.
+
+Every `DESIGN.md` in use, and which page it governs, is listed in [`design/README.md`](design/README.md).
 
 ## Tech
 
