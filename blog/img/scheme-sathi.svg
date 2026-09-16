@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 576" role="img" aria-label="Scheme Sathi cover">
-  <rect width="1024" height="576" fill="#5200ff"/>
-  <circle cx="860" cy="120" r="150" fill="#3cffd0"/>
-  <circle cx="760" cy="300" r="70" fill="#ffe600"/>
-  <text x="64" y="120" font-family="Space Mono, Courier New, monospace" font-size="26" letter-spacing="4" fill="#ffffff" opacity=".8">BUILD LOG // 2026</text>
-  <text x="60" y="330" font-family="Anton, Impact, Arial Narrow, sans-serif" font-size="150" fill="#ffffff">SCHEME</text>
-  <text x="60" y="470" font-family="Anton, Impact, Arial Narrow, sans-serif" font-size="150" fill="#3cffd0">SATHI</text>
-  <text x="64" y="530" font-family="Space Mono, Courier New, monospace" font-size="22" letter-spacing="3" fill="#ffffff" opacity=".8">A WELFARE BOT THAT REFUSES TO ANSWER</text>
-</svg>
