@@ -109,6 +109,12 @@
           </div>
         </a>
       </div>
+
+      <nav class="pager" aria-label="Pagination">
+        <button id="prev" class="sort-btn" type="button">← Newer</button>
+        <span id="page-info"></span>
+        <button id="next" class="sort-btn" type="button">Older →</button>
+      </nav>
     </section>
   </main>
 
@@ -123,37 +129,50 @@
 
   <script>
     (() => {
+      const PER_PAGE = 6;
+      const STORAGE_KEY = 'blog-sort-order';
       const btn = document.getElementById('sort-toggle');
       const container = document.querySelector('.articles');
-      const STORAGE_KEY = 'blog-sort-order';
+      const prev = document.getElementById('prev');
+      const next = document.getElementById('next');
+      const info = document.getElementById('page-info');
 
-      // HTML is oldest-first; default display is newest-first unless user saved a preference
-      const saved = localStorage.getItem(STORAGE_KEY);
-      let isNewestFirst = saved ? saved === 'newest' : true;
+      // HTML source is oldest-first; keep a fixed copy and re-render from it.
+      const all = [...container.children];
+      const pages = Math.max(1, Math.ceil(all.length / PER_PAGE));
 
-      function applySort() {
-        const articles = [...container.children];
-        // HTML source is oldest-first, so reverse for newest-first
-        if (isNewestFirst) {
-          articles.sort(() => -1);
-          articles.reverse();
-        }
-        articles.forEach(a => container.appendChild(a));
-        btn.textContent = isNewestFirst ? 'Newest first ↓' : 'Oldest first ↓';
+      let newestFirst = (localStorage.getItem(STORAGE_KEY) || 'newest') === 'newest';
+      let page = Math.min(pages, Math.max(1, parseInt(new URLSearchParams(location.search).get('page')) || 1));
+
+      function render() {
+        const ordered = newestFirst ? [...all].reverse() : [...all];
+        const start = (page - 1) * PER_PAGE;
+        container.replaceChildren(...ordered.slice(start, start + PER_PAGE));
+
+        btn.textContent = newestFirst ? 'Newest first ↓' : 'Oldest first ↓';
+        // Labels follow the sort so "Older" always means older posts.
+        prev.textContent = newestFirst ? '← Newer' : '← Older';
+        next.textContent = newestFirst ? 'Older →' : 'Newer →';
+        prev.disabled = page === 1;
+        next.disabled = page === pages;
+        info.textContent = `Page ${page} of ${pages}`;
+        document.querySelector('.pager').hidden = pages === 1;
+
+        const url = new URL(location);
+        page === 1 ? url.searchParams.delete('page') : url.searchParams.set('page', page);
+        history.replaceState(null, '', url);
       }
 
-      // Apply sort on page load
-      applySort();
-
       btn.addEventListener('click', () => {
-        // Reverse current order
-        const articles = [...container.children];
-        articles.reverse();
-        articles.forEach(a => container.appendChild(a));
-        isNewestFirst = !isNewestFirst;
-        btn.textContent = isNewestFirst ? 'Newest first ↓' : 'Oldest first ↓';
-        localStorage.setItem(STORAGE_KEY, isNewestFirst ? 'newest' : 'oldest');
+        newestFirst = !newestFirst;
+        localStorage.setItem(STORAGE_KEY, newestFirst ? 'newest' : 'oldest');
+        page = 1;
+        render();
       });
+      prev.addEventListener('click', () => { page--; render(); });
+      next.addEventListener('click', () => { page++; render(); window.scrollTo({ top: container.offsetTop - 24, behavior: 'smooth' }); });
+
+      render();
     })();
   </script>
 </body>
