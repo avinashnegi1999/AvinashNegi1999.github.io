@@ -193,12 +193,11 @@ footer .set{display:flex;flex-wrap:wrap;gap:14px 22px}
 .hero{position:relative;overflow:hidden}
 .hero .wrap,.hero .wide{position:relative;z-index:1}
 .horizon{position:relative}
-.horizon .product{position:relative;z-index:1}
+.horizon .product{position:relative;z-index:1;margin-top:clamp(64px,10vh,96px)}
 .ridges{position:absolute;left:50%;top:-130px;width:max(1400px,120vw);transform:translateX(-50%);
   pointer-events:none;z-index:0}
 .avail{flex-wrap:wrap;justify-content:center}
 .avail .clock::before{content:"·";margin-right:8px}
-@media (max-width:720px){.ridges{top:-70px}}
 @media (max-width:560px){.avail .clock{flex-basis:100%;text-align:center}.avail .clock::before{content:none}}
 .ridges path{fill:none;stroke-linecap:round;stroke-linejoin:round}
 .ridges .r1{stroke:#e8e8ed;stroke-width:1.5}
@@ -574,6 +573,18 @@ footer .set{display:flex;flex-wrap:wrap;gap:14px 22px}
   var ridges = $('.ridges');
   $$('.ridges .draw').forEach(function(p){ p.style.setProperty('--len', Math.ceil(p.getTotalLength())); });
   ridges.classList.add(reduce ? 'still' : 'go');
+  /* Keep the highest point (the top of the sun) below the hero links at
+     every width, so no line ever crosses text. offsetTop ignores the
+     entrance transforms, so this is right even mid-fade. */
+  var heroWrap = $('.hero .wrap'), heroLinks = $('.hero .links'), horizon = $('.horizon');
+  function placeRidges(){
+    var linksBottom = heroWrap.offsetTop + heroLinks.offsetTop + heroLinks.offsetHeight;
+    var scale = ridges.getBoundingClientRect().width / 1400;
+    ridges.style.top = (linksBottom - horizon.offsetTop + 14 - 36 * scale) + 'px';
+  }
+  placeRidges();
+  addEventListener('resize', placeRidges);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(placeRidges);
   if (!reduce && fine){
     var hero = $('.hero'), layers = $$('.ridges .layer');
     hero.addEventListener('pointermove', function(e){
