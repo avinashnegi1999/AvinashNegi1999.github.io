@@ -906,14 +906,13 @@ function buildThread(){
   thread.style.height = Hd + 'px';
   thread.innerHTML = '';
   var gx = (Wd - Math.min(Wd, 1120)) / 2, side = gx > 70 ? gx * .5 : 9, loops = gx > 110, amp = Math.min(34, gx * .3);
-  var narrow = gx <= 70;                                                 // phones: no room to switch sides without crossing text
   var sb = heroSig.getBoundingClientRect(), hy = scrollY;
   var start = [sb.left + sb.width * (1472 - 420) / 1080, sb.top + hy + sb.height * (596 - 300) / 470];
   var heroBot = pageY(hero) + hero.offsetHeight, rx = Wd - side;
   // leave the dot sideways, then run down the right gutter so the hero copy stays clean
   var P = [start, [Math.min(start[0] + 60, rx), start[1] + 30], [rx, start[1] + 140], [rx, heroBot - 40]], loopAt = [];
   $$('[data-thread]').forEach(function(sec){
-    var x = !narrow && sec.getAttribute('data-thread') === 'left' ? side : Wd - side, dir = x < Wd / 2 ? 1 : -1;
+    var x = sec.getAttribute('data-thread') === 'left' ? side : Wd - side, dir = x < Wd / 2 ? 1 : -1;
     var top = pageY(sec) + 50, bot = pageY(sec) + sec.offsetHeight - 40, m = (top + bot) / 2;
     P.push([x, top]);
     if (loops) {
@@ -922,8 +921,7 @@ function buildThread(){
     }
     if (sec.id === 'now') {
       var f = $('#endSig').getBoundingClientRect();
-      if (narrow) P.push([x, f.top + scrollY - 40], [f.left + f.width * (1472 - 420) / 1080 + 14, f.top + scrollY + f.height * (596 - 300) / 470]);
-      else P.push([x, bot - 260 < m ? m : bot - 260], [f.left + f.width * (447 - 420) / 1080 - 40, f.top + scrollY + f.height * .9]);
+      P.push([x, bot - 260 < m ? m : bot - 260], [f.left + f.width * (447 - 420) / 1080 - 40, f.top + scrollY + f.height * .9]);
     } else P.push([x, bot]);
   });
   var C = catmull(P);
