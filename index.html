@@ -105,7 +105,7 @@ h1,h2,h3{margin:0}
 #thread path{fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:5}
 #thread .t-ink{stroke:var(--ink)}
 #thread .t-echo{stroke:var(--lav);transform:translate(5px,5px)}
-#thread .tip{fill:var(--orange)}
+#thread .tip{fill:var(--orange);transition:opacity .4s}
 #thread .spark{opacity:0;transform:scale(0) rotate(-90deg);transform-box:fill-box;transform-origin:center;
   transition:opacity .4s,transform .6s cubic-bezier(.3,1.6,.5,1)}
 #thread .spark.on{opacity:1;transform:none}
@@ -761,7 +761,7 @@ function buildMesh(){
   }
 }
 /* loop: assemble → hold → shatter (outer shards leave first) → reassemble */
-var HOLD = 4000, pDir = 1, pVisible = false, pTimer = 0;
+var HOLD = 3000, pDir = 1, pVisible = false, pTimer = 0;
 function tMax(){ var m = 0; for (var i = 0; i < tris.length; i++) m = Math.max(m, tris[i].delay); return m + .9; }
 function reroll(){
   tris.forEach(function(T){
@@ -921,7 +921,9 @@ function buildThread(){
     }
     if (sec.id === 'now') {
       var f = $('#endSig').getBoundingClientRect();
-      P.push([x, bot - 260 < m ? m : bot - 260], [f.left + f.width * (447 - 420) / 1080 - 40, f.top + scrollY + f.height * .9]);
+      // end exactly where the pen starts the finale's "A" (stroke point 447,740), curling in from below-left
+      var ax = f.left + f.width * (447 - 420) / 1080, ay = f.top + scrollY + f.height * (740 - 300) / 470;
+      P.push([x, bot - 260 < m ? m : bot - 260], [ax - 24, ay + 26], [ax, ay]);
     } else P.push([x, bot]);
   });
   var C = catmull(P);
@@ -949,13 +951,14 @@ function goalFromScroll(){
   var y = scrollY + innerHeight * .62, lo = 0, hi = samples.length - 1;
   if (reduce) { goalL = total; return; }
   if (!inked) { goalL = 0; return; }                                       // wait for the signature to finish
+  if (scrollY + innerHeight >= document.documentElement.scrollHeight - 2) { goalL = total; return; }   // bottom: always finish
   while (lo < hi) { var mid = (lo + hi + 1) >> 1; if (samples[mid][1] <= y) lo = mid; else hi = mid - 1; }
   goalL = samples.length ? samples[lo][0] : 0;
 }
 function paint(){
   [tEcho, tInk].forEach(function(p){ p.style.strokeDashoffset = (total - curL).toFixed(1); });
   var q = pointAt(curL); tip.setAttribute('cx', q.x); tip.setAttribute('cy', q.y);
-  tip.style.opacity = curL < 4 ? 0 : 1;
+  tip.style.opacity = curL < 4 || curL >= total - 2 ? 0 : 1;               // at the end the pen hands over to the signature
   for (var i = 0; i < sparks.length; i++) {
     var sp = sparks[i], want = q.y > sp.y - 20;
     if (want !== sp.on) { sp.on = want; sp.kids.forEach(function(n){ n.classList.toggle('on', want); }); }
