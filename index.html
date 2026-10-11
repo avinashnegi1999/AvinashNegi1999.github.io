@@ -592,7 +592,7 @@ $$('svg[data-sig]').forEach(function(svg){
 var stage = $('#stage'), ctx = stage.getContext('2d'), heroSig = $('#heroSig'), hero = $('.hero');
 var W = 0, H = 0, CX = 0, CY = 0, R = 0, DOT = { x: 0, y: 0 }, TXT = [0, 0, 0, 0];
 var ptr = { x: -9999, y: -9999, nx: 0, ny: 0, tx: 0, ty: 0 };
-var rnd = lcg(5), shards = [], pops = [], born = reduce, t0 = performance.now(), heroOn = true;
+var rnd = lcg(5), shards = [], pops = [], born = reduce, t0 = performance.now(), heroOn = true, inked = reduce;
 for (var i = 0; i < 78; i++) {
   var mote = i % 6 === 5;
   shards.push({ a: rnd() * TAU, r: .72 + rnd() * .5, y: (rnd() - .5) * .5, s: mote ? 2.5 + rnd() * 3.5 : 7 + rnd() * 17,
@@ -714,7 +714,12 @@ function frame(now){
 function startStage(){ last = performance.now(); requestAnimationFrame(frame); }
 sizeStage();
 if (reduce) { born = true; frame(performance.now()); }
-else { setTimeout(function(){ sizeStage(); release(); }, 2400); startStage(); }
+else {
+  setTimeout(function(){ sizeStage(); release(); }, 2400);
+  // the thread is the pen carrying on: it may only leave once the "An" is written and the dot has landed
+  setTimeout(function(){ inked = true; goalFromScroll(); if (!ticking) { ticking = true; requestAnimationFrame(follow); } }, 2500);
+  startStage();
+}
 hero.addEventListener('pointermove', function(e){
   var b = hero.getBoundingClientRect(); ptr.x = e.clientX - b.left; ptr.y = e.clientY - b.top;
   ptr.tx = (ptr.x / W - .5) * 2; ptr.ty = (ptr.y / H - .5) * 2;
@@ -941,6 +946,7 @@ function buildThread(){
 function goalFromScroll(){
   var y = scrollY + innerHeight * .62, lo = 0, hi = samples.length - 1;
   if (reduce) { goalL = total; return; }
+  if (!inked) { goalL = 0; return; }                                       // wait for the signature to finish
   while (lo < hi) { var mid = (lo + hi + 1) >> 1; if (samples[mid][1] <= y) lo = mid; else hi = mid - 1; }
   goalL = samples.length ? samples[lo][0] : 0;
 }
