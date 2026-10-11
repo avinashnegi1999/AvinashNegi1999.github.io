@@ -58,14 +58,15 @@ h1,h2,h3{margin:0}
 .sig .dot{fill:var(--orange)}
 .sig .tm{font:600 22px var(--sans);fill:var(--ink)}
 /* the write-on: each stroke has pathLength=1 */
-.sig.write path{stroke-dasharray:1;stroke-dashoffset:1;animation:ink var(--dur,.6s) cubic-bezier(.5,0,.2,1) var(--at,0s) forwards}
+/* hidden until its own turn: a fully-dashed-out round-cap stroke still paints a dot at its end */
+.sig.write path{stroke-dasharray:1;stroke-dashoffset:1;visibility:hidden;animation:ink var(--dur,.6s) cubic-bezier(.5,0,.2,1) var(--at,0s) forwards}
 .sig.write .echo path{animation-delay:calc(var(--at,0s) + .12s)}
 .sig.write .dot{transform-box:fill-box;transform-origin:center;transform:scale(0);animation:pop .55s cubic-bezier(.3,1.7,.5,1) var(--dotAt,2.35s) forwards}
 .sig.write .tm{opacity:0;animation:fade .4s var(--dotAt,2.35s) forwards}
-.sig.idle path{stroke-dasharray:1;stroke-dashoffset:1}
+.sig.idle path{stroke-dasharray:1;stroke-dashoffset:1;visibility:hidden}
 .sig.idle .dot{transform:scale(0)}
 .sig.idle .tm{opacity:0}
-@keyframes ink{to{stroke-dashoffset:0}}
+@keyframes ink{from{stroke-dashoffset:1;visibility:visible}to{stroke-dashoffset:0;visibility:visible}}
 @keyframes pop{to{transform:scale(1)}}
 @keyframes fade{to{opacity:1}}
 
