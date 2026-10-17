@@ -45,10 +45,16 @@ section{animation:in .25s ease}
 @keyframes in{from{opacity:0;transform:translateY(6px)}}
 #theme{margin-left:auto;width:34px;height:34px;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--fg);cursor:pointer;font-size:15px}
 
-main{padding:56px 0 40px;text-align:center}
-main .left{text-align:left}
-.avatar{width:120px;height:120px;border-radius:50%;margin:28px auto 26px;display:grid;place-items:center;
-  background:var(--code);display:block;cursor:pointer}
+main{padding:56px 0 40px}
+.home{display:flex;align-items:flex-start;gap:48px;margin-top:24px}
+.home-text{flex:1}
+.home-text p:first-of-type{font-size:18px;line-height:1.8}
+.home-img{flex-shrink:0;width:140px}
+.home-img img{display:block;width:100%;aspect-ratio:1;object-fit:cover;object-position:top;border-radius:9999px;
+  border:3px solid var(--line);box-shadow:0 4px 12px rgba(28,25,23,.06);filter:grayscale(1);
+  transition:transform .25s ease,box-shadow .25s ease}
+.home-img img:hover{transform:scale(1.05);box-shadow:0 12px 32px rgba(28,25,23,.08)}
+@media (max-width:640px){.home{flex-direction:column-reverse;align-items:center;text-align:center;gap:24px}.home-img{width:120px}}
 
 .proj{margin:0 0 22px;text-align:left}
 .proj b{color:var(--fg);font-weight:500}
@@ -75,15 +81,18 @@ footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 
 <main class="wrap">
   <section data-page="home">
-  <h1 class="left">👋🏽 Hello</h1>
+  <h1>👋🏽 Hello</h1>
 
-  <canvas class="avatar" id="portrait" role="img" aria-label="Portrait of Avinash Negi"></canvas>
-
+  <div class="home">
+  <div class="home-text">
   <p>I'm Avinash — <code>@avinashnegi1999</code> most places on the internet. I'm a Python developer from Kotdwara, Uttarakhand. I build small tools that solve one real problem, then keep them running.</p>
   <p>No job yet, so this page is four things I actually shipped. One service is <a href="https://github.com/avinashnegi1999/yojana-sathi">live on AWS</a>, a desktop app is in daily use on my own laptop, and I <a href="#writing">write down</a> every bug that takes a machine down.</p>
   <p>Open to remote Python internships. Degree finishes May 2027.</p>
+  </div>
+  <div class="home-img"><img src="assets/portrait.jpg" alt="Avinash Negi"></div>
+  </div>
 
-  <div class="left">
+  <div>
   <h2>⭐ Featured Posts</h2>
   <p>A few things I wrote down after breaking them:</p>
   <ul>
@@ -179,59 +188,7 @@ function route(){
 }
 addEventListener('hashchange', route); route();
 
-/* portrait: assembles from glass shards (from index2), replays on click/hover */
-(function(){
-  var pc = document.getElementById('portrait'), ctx = pc.getContext('2d'), img = new Image(), tris = [], S = 0, t0 = 0, busy = false;
-  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var COLS = ['#1c1917', '#57534e', '#a8a29e', '#e7e5e4', '#b45309', '#fdba74'];
-  function ease(u){ u = Math.max(0, Math.min(1, u)); return 1 - Math.pow(1 - u, 3); }
-  img.src = 'assets/portrait.jpg';
-  function build(){
-    var d = Math.min(devicePixelRatio || 1, 2); S = pc.clientWidth;
-    pc.width = pc.height = S * d; ctx.setTransform(d, 0, 0, d, 0, 0);
-    var n = 7, c = S / n, V = [];
-    for (var j = 0; j <= n; j++) { V[j] = []; for (var i = 0; i <= n; i++) {
-      var edge = !i || !j || i === n || j === n;
-      V[j][i] = [i * c + (edge ? 0 : (Math.random() - .5) * c * .7), j * c + (edge ? 0 : (Math.random() - .5) * c * .7)];
-    } }
-    tris = [];
-    for (var y = 0; y < n; y++) for (var x = 0; x < n; x++) {
-      var a = V[y][x], b = V[y][x + 1], cc = V[y + 1][x + 1], e = V[y + 1][x];
-      [[a, b, cc], [a, cc, e]].forEach(function(P){
-        var mx = (P[0][0] + P[1][0] + P[2][0]) / 3, my = (P[0][1] + P[1][1] + P[2][1]) / 3;
-        var ang = Math.atan2(my - S / 2, mx - S / 2) + (Math.random() - .5), far = 40 + Math.random() * 90;
-        tris.push({ P: P, mx: mx, my: my, ox: Math.cos(ang) * far, oy: Math.sin(ang) * far, rot: (Math.random() - .5) * 3,
-          delay: Math.hypot(mx - S / 2, my - S / 2) / S + Math.random() * .2, col: COLS[(Math.random() * COLS.length) | 0] });
-      });
-    }
-  }
-  function photo(){ var r = Math.min(img.width, img.height);
-    ctx.drawImage(img, (img.width - r) / 2, 0, r, r, 0, 0, S, S); }
-  function draw(now){
-    var t = (now - t0) / 1000, all = true;
-    ctx.clearRect(0, 0, S, S);
-    for (var i = 0; i < tris.length; i++) {
-      var T = tris[i], u = (t - T.delay) / .8, e = ease(u), inv = 1 - e;
-      if (u < 1) all = false;
-      if (e <= 0) continue;
-      ctx.save(); ctx.globalAlpha = Math.min(1, e * 1.6);
-      ctx.translate(T.mx + T.ox * inv, T.my + T.oy * inv); ctx.rotate(T.rot * inv); ctx.translate(-T.mx, -T.my);
-      ctx.beginPath(); ctx.moveTo(T.P[0][0], T.P[0][1]); ctx.lineTo(T.P[1][0], T.P[1][1]); ctx.lineTo(T.P[2][0], T.P[2][1]); ctx.closePath();
-      if (inv > .3) { ctx.fillStyle = T.col; ctx.fill(); } else { ctx.clip(); photo(); }
-      ctx.restore();
-    }
-    if (all) { ctx.clearRect(0, 0, S, S); photo(); busy = false; return; }
-    requestAnimationFrame(draw);
-  }
-  function play(){
-    if (busy || !img.complete || !img.naturalWidth) return;
-    if (reduce) { photo(); return; }
-    build(); busy = true; t0 = performance.now(); requestAnimationFrame(draw);
-  }
-  img.onload = function(){ build(); play(); };
-  pc.addEventListener('click', play);
-  pc.addEventListener('pointerenter', play);
-})();
+
 </script>
 </body>
 </html>
